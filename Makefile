@@ -4,32 +4,28 @@ all: build
 .PHONY: build
 .SILENT: build
 build:
-	dfx canister create calc
+	dfx canister create --all
 	dfx build
 
 .PHONY: install
 .SILENT: install
 install: build
-	dfx canister install calc
+	dfx canister install --all
 
 .PHONY: upgrade
 .SILENT: upgrade
 upgrade: build
-	dfx canister install calc --mode=upgrade
+	dfx canister install --all --mode=upgrade
 
 .PHONY: test
 .SILENT: test
-test: install
-	dfx canister call calc add '(9)' \
-		| grep '(9 : int)' && echo 'PASS'
-	dfx canister call calc sub '(1)' \
-		| grep '(8 : int)' && echo 'PASS'
-	dfx canister call calc mul '(3)' \
-		| grep '(24 : int)' && echo 'PASS'
-	dfx canister call calc div '(6)' \
-		| grep '(opt (4 : int))' && echo 'PASS'
+	cargo test
+	(  dfx canister call counter set '(7 : nat)' \
+	&& dfx canister call counter inc \
+	&& dfx canister call counter get \
+	) | grep '(8 : nat)' && echo 'PASS'
 
 .PHONY: clean
 .SILENT: clean
 clean:
-	rm -fr .dfx
+	rm -rf .dfx
